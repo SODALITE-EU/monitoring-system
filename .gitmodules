@@ -1,0 +1,3 @@
+[submodule "skydive-flow-exporter"]
+	path = skydive-flow-exporter
+	url = https://github.com/skydive-project/skydive-flow-exporter
