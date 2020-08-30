@@ -20,4 +20,4 @@ Once installed, the file ```prometheus.yml``` should be modified to fit the envi
 
 ## Usage. 
 
-Once installed and configured, its functioning does not differ from any Prometheus installation. For the rest of the monitoring components, visit their respective docs. 
+Once installed and configured, its functioning does not differ from any Prometheus installation. For the rest of the monitoring components, visit their respective docs.  
