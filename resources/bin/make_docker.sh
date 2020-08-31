@@ -43,12 +43,12 @@ BRANCH=${JENKINS_BRANCH:-$DEFAULT_BRANCH}
 if [ "$BRANCH" != "master" ]; then
     VERSION=$(echo $BRANCH | sed -e"s|/|-|")
 
-else
-    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "Skipping untagged commit on master"
-	exit 0
-    fi
-fi
+# else
+#     if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+#         echo "Skipping untagged commit on master"
+# 	exit 0
+#     fi
+# fi
 
 
 if [ "$ACTION" = "build" ]; then
