@@ -48,7 +48,10 @@ if [ "$BRANCH" != "master" ]; then
 #         echo "Skipping untagged commit on master"
 # 	exit 0
 #     fi
-# fi
+#
+fi
+
+
 
 
 if [ "$ACTION" = "build" ]; then
