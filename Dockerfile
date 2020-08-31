@@ -37,4 +37,8 @@ RUN sudo chown prometheus:prometheus /etc/prometheus/prometheus.yml
 
 RUN mkdir -p /prometheus && chown -R nobody:nogroup etc/prometheus /prometheus
 
+<<<<<<< HEAD
 #RUN sudo -u prometheus /usr/local/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries
+=======
+#RUN sudo -u prometheus /usr/local/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries
+>>>>>>> master
