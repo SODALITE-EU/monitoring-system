@@ -8,7 +8,7 @@ pipeline {
         }
         stage('Build Docker image') {
             steps {
-                sh "git fetch --tags && resources/bin/make_docker.sh build sodaliteh2020/monitoring-system ."
+                sh "git fetch --tags && resources/bin/make_docker.sh build sodaliteh2020/monitoring-system"
             }
         }
         stage('Push image to DockerHub') {
