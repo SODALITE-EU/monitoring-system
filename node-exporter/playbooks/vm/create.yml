@@ -52,6 +52,66 @@
           -o BatchMode=yes
           -o UserKnownHostsFile=/dev/null
           -o StrictHostKeyChecking=no
+    
+    
+    - name: Download Node exporter
+        get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz
+        dest: /tmp
+        checksum: 3369b76cd2b0ba678b6d618deab320e565c3d93ccb5c2a0d5db51a53857768ae
+
+    - name: Create Node exporter folder in opt
+      become: yes
+      file:
+        path: /usr/local/bin/node_exporter
+        state: directory
+        mode: '0777'
+
+    - name: Extract Node exporter
+      become: yes
+      unarchive:
+         src: /tmp/node_exporter-1.0.1.linux-amd64.tar.gz
+         dest: /usr/local/bin/node_exporter
+         remote_src: yes
+
+    - name: Create Node exporter Service File
+      become: yes
+      file:
+          path: /etc/systemd/system/node_exporter.service
+          state: touch
+
+    - name: Edit Node exporter Service File
+      become: yes
+      blockinfile:
+          path: /etc/systemd/system/node_exporter.service
+          marker: ""
+          block: |
+            [Unit]
+            Description=Node Exporter
+            Wants=network-online.target
+            After=network-online.target
+
+            [Service]
+            User=node_exporter
+            Group=node_exporter
+            Type=simple
+            ExecStart=/usr/local/bin/node_exporter
+
+            [Install]
+            WantedBy=multi-user.target
+
+    - name: systemd reload
+      become: yes
+      systemd:
+        daemon_reload: yes
+
+    - name: Start Node exporter service
+      become: yes
+      service:
+        name: node_exporter
+        enabled: yes
+        state: started
+
 
 - hosts: vms
   gather_facts: no
