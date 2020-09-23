@@ -6,6 +6,7 @@ scrape_configs:
   - job_name: 'node-exporter'
     scheme: http
     openstack_sd_configs:
+      # Only accessible from within openstack VMs
       - {identity_endpoint: 'https://cloud.sodalite.eu:5000/v3/', username: USERNAME, project_name: PROJECTNAME, password: 'PASSWORD', role: instance, domain_name: default, region: RegionOne,  project_id: 'PROJECTID'}
     relabel_configs:
       # keep only instances which are flagged for scraping
