@@ -40,16 +40,16 @@ JENKINS_BRANCH=${CHANGE_BRANCH:-$GIT_BRANCH}
 # Detect if under Jenkins; if not, use DEFAULT_BRANCH
 BRANCH=${JENKINS_BRANCH:-$DEFAULT_BRANCH}
 
-# if [ "$BRANCH" != "master" ]; then
-#     VERSION=$(echo $BRANCH | sed -e"s|/|-|")
+if [ "$BRANCH" != "master" ]; then
+    VERSION=$(echo $BRANCH | sed -e"s|/|-|")
 
-# # else
-# #     if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-# #         echo "Skipping untagged commit on master"
-# # 	exit 0
-# #     fi
-# #
-# fi
+else
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "Skipping untagged commit on master"
+	exit 0
+    fi
+
+fi
 
 
 
