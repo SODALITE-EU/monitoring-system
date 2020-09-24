@@ -1,6 +1,7 @@
 ---
-- hosts: all
-  gather_facts: no
+- name: Install node exporter
+  host: host.name.ip
+  become: true
 
   tasks:  
     - name: Download Node exporter
@@ -60,10 +61,3 @@
         name: node_exporter
         enabled: yes
         state: started
-
-
-- hosts: vms
-  gather_facts: no
-  tasks:
-    - name: Wait for ssh to wake up
-      wait_for_connection:
