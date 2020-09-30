@@ -1,0 +1,135 @@
+---
+- hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Create VM
+      os_server:
+        state: present
+        name: "{{ vm_name }}"
+        image: "{{ image }}"
+        key_name: "{{ key_name }}"
+        flavor: "{{ flavor }}"
+        network: "{{ network }}"
+        security_groups: "{{ security_groups }}"
+        metadata: "{{ metadata }}"
+      register: server_info
+
+    - name: Set attributes
+      set_stats:
+        data:
+          private_address: "{{ server_info.server.private_v4 }}"
+          public_address: "{{ server_info.server.public_v4 }}"
+          id: "{{ server_info.server.id }}"
+
+    - name: Create temporary inventory for ssh wait
+      add_host:
+        name: server
+        groups: vms
+        ansible_host: "{{ server_info.server.public_v4 }}"
+        ansible_user: ubuntu
+        ansible_ssh_common_args: >
+          -o IdentitiesOnly=yes
+          -o BatchMode=yes
+          -o UserKnownHostsFile=/dev/null
+          -o StrictHostKeyChecking=no
+
+    - name: add metadata to instance
+    openstack.cloud.server_metadata:
+        state: present
+        auth:
+            auth_url: 
+            username: 
+            password: 
+            project_name: 
+        name: "{{ vm_name }}"
+        meta:
+            prometheus_io_scrape: true
+            prometheus_io_port: 9100
+    
+    - name: Add the user "node_exporter"
+    user:
+      name: "node_exporter"
+      shell: "/bin/false"
+      create_home: no
+  
+    - name: Download Node exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz"
+        dest: /tmp
+        checksum: "sha256:3369b76cd2b0ba678b6d618deab320e565c3d93ccb5c2a0d5db51a53857768ae"
+  
+    - name: Extract Node exporter
+      become: yes
+      unarchive:
+        src: "/tmp/node_exporter-1.0.1.linux-amd64.tar.gz"
+        dest: "/tmp"
+        remote_src: yes
+    
+    - name: Copy executable
+      become: yes
+      copy: 
+        src: "/tmp/node_exporter-1.0.1.linux-amd64/node_exporter"
+        dest: "/usr/local/bin"
+    
+    - name: Give the user "node_exporter" permission to that binary
+      become: yes
+      file:
+        path: "/usr/local/bin/node_exporter"
+        owner: "node_exporter"
+        group: "node_exporter"
+        mode: "0755"
+        
+    - name: Delete compressed download
+      file:
+        path: "/tmp/node_exporter-1.0.1.linux-amd64.tar.gz"
+        state: absent
+  
+    - name: Delete folder
+      file:
+        path: "/tmp/node_exporter-1.0.1.linux-amd64"
+        state: absent
+  
+    - name: Create Node exporter Service File
+      become: yes
+      file:
+        path: /etc/systemd/system/node_exporter.service
+        state: touch
+  
+    - name: Edit Node exporter Service File
+      become: yes
+      blockinfile:
+        path: /etc/systemd/system/node_exporter.service
+        marker: ""
+        block: |
+          [Unit]
+          Description=Node Exporter
+          Wants=network-online.target
+          After=network-online.target
+  
+          [Service]
+          User=node_exporter
+          Group=node_exporter
+          Type=simple
+          ExecStart=/usr/local/bin/node_exporter
+  
+          [Install]
+          WantedBy=multi-user.target
+  
+    - name: systemd reload
+      become: yes
+      systemd:
+        daemon_reload: yes
+  
+    - name: Start Node exporter service
+      become: yes
+      service:
+        name: node_exporter
+        enabled: yes
+        state: started
+
+- hosts: vms
+  gather_facts: no
+  tasks:
+    - name: Wait for ssh to wake up
+      wait_for_connection:
