@@ -1,0 +1,128 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Create VM
+      os_server:
+        state: present
+        name: "{{ vm_name }}"
+        image: "{{ image }}"
+        key_name: "{{ key_name }}"
+        flavor: "{{ flavor }}"
+        network: "{{ network }}"
+        security_groups: "{{ security_groups }}"
+      register: server_info
+
+    - name: Set attributes
+      set_stats:
+        data:
+          private_address: "{{ server_info.server.private_v4 }}"
+          public_address: "{{ server_info.server.public_v4 }}"
+          id: "{{ server_info.server.id }}"
+
+    - name: Create temporary inventory for ssh wait
+      add_host:
+        name: consul_server
+        groups: monitoring_system
+        ansible_host: "{{ server_info.server.public_v4 }}"
+        ansible_user: ubuntu
+        ansible_ssh_common_args: >
+          -o IdentitiesOnly=yes
+          -o BatchMode=yes
+          -o UserKnownHostsFile=/dev/null
+          -o StrictHostKeyChecking=no
+
+- hosts: consul_server
+  gather_facts: no
+  tasks:
+    - name: Wait for ssh to wake up
+      wait_for_connection:
+
+    - name: Download Consul 1.8.5
+      get_url:
+        url: "https://releases.hashicorp.com/consul/1.8.5/consul_1.8.5_linux_amd64.zip"
+        dest: /tmp
+        checksum: "sha256:94ab38e6221d3da393d0bbdf19cc524051253a75db078c31e249dad2c497ad46"
+
+    - name: Install Unzip tool
+      become: yes
+      apt:
+        name: unzip
+        state: present
+        force_apt_get: true
+
+    - name: Extract Consul
+      become: yes
+      unarchive:
+        src: "/tmp/consul_1.8.5_linux_amd64.zip" 
+        dest: "/bin"
+        remote_src: yes
+    
+    - name: Delete compressed download
+      file:
+        path: "/tmp/consul_1.8.5_linux_amd64.zip"
+        state: absent
+
+    - name: Add the user "consul"
+      become: yes
+      user:
+        name: "consul"
+        shell: "/bin/false"
+        create_home: no
+
+    - name: Create Consul data folder
+      become: yes
+      file:
+        path: "/consul/data"
+        state: directory
+        owner: "consul"
+        group: "consul"
+        mode: "0755"
+
+    - name: Create Consul config folder
+      become: yes
+      file:
+        path: "/consul/config"
+        state: directory
+        owner: "consul"
+        group: "consul"
+        mode: "0755"
+
+    - name: Create Consul service File
+      become: yes
+      file:
+        path: /etc/systemd/system/consul.service
+        state: touch
+
+    - name: Edit Consul agent service file
+      become: yes
+      blockinfile:
+        path: /etc/systemd/system/consul.service
+        marker: ""
+        block: |
+          [Unit]
+          Description=Consul
+          Wants=network-online.target
+          After=network-online.target
+  
+          [Service]
+          User=consul
+          Group=consul
+          Type=simple
+          ExecStart=/bin/consul agent -server -data-dir=/consul/data -config-dir=/consul/config -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
+  
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: systemd reload
+      become: yes
+      systemd:
+        daemon_reload: yes
+  
+    - name: Start Consul service
+      become: yes
+      service:
+        name: consul
+        enabled: yes
+        state: started
