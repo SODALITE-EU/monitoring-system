@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'consul-registered-node-exporters'
+    consul_sd_configs:
+      - server: "{{ consul_server_public_address }}:8500"
+        services: [consul-registered-node-exporters]
+
+  - job_name: 'consul-registered-ipmi-exporters'
+    consul_sd_configs:
+      - server: "{{ consul_server_public_address }}:8500"
+        services: [consul-registered-ipmi-exporters]
+
+  - job_name: 'consul-registered-hpc-exporters'
+    consul_sd_configs:
+      - server: "{{ consul_server_public_address }}:8500"
+        services: [consul-registered-hpc-exporters]
+
+  - job_name: 'consul-registered-edge-exporters'
+    consul_sd_configs:
+      - server: "{{ consul_server_public_address }}:8500"
+        services: [consul-registered-edge-exporters]
+

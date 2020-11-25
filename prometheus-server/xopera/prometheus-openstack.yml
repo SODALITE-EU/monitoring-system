@@ -1,0 +1,42 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+  - iac-modules/openstack/openstack_vm.yaml
+
+node_types:
+  sodalite.nodes.OpenStack.PrometheusServer:
+    derived_from: sodalite.nodes.OpenStack.VM
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          create:
+            inputs:
+              vm_name:  { type: string, default: { get_property: [ SELF, name     ] } }
+              image:    { type: string, default: { get_property: [ SELF, image    ] } }
+              flavor:   { type: string, default: { get_property: [ SELF, flavor   ] } }
+              network:  { type: string, default: { get_property: [ SELF, network  ] } }
+              security_groups:  { type: string, default: { get_property: [ SELF, security_groups  ] } }
+              key_name: { type: string, default: { get_property: [ SELF, key_name ] } }
+              consul_server_public_address: { type: string, default: { get_input: consul_server_public_address } }
+            implementation:
+              primary: playbooks/vm/create.yml
+              dependencies: 
+                - playbooks/prometheus.yml.tmpl
+
+topology_template:
+
+  inputs:
+    consul_server_public_address:
+      type: string
+
+  node_templates:
+    vm:
+      type: sodalite.nodes.OpenStack.PrometheusServer
+      properties:
+        name: openstack-prometheus-server
+        image: ubuntu
+        flavor: m1.small
+        network: orchestrator-network
+        security_groups: default,prometheus
+        key_name: jorge-test

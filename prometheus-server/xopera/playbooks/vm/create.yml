@@ -1,0 +1,159 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Create VM
+      os_server:
+        state: present
+        name: "{{ vm_name }}"
+        image: "{{ image }}"
+        key_name: "{{ key_name }}"
+        flavor: "{{ flavor }}"
+        network: "{{ network }}"
+        security_groups: "{{ security_groups }}"
+      register: server_info
+
+    - name: Set attributes
+      set_stats:
+        data:
+          private_address: "{{ server_info.server.private_v4 }}"
+          public_address: "{{ server_info.server.public_v4 }}"
+          id: "{{ server_info.server.id }}"
+
+    - name: Create temporary inventory for ssh wait
+      add_host:
+        name: prometheus_server
+        groups: monitoring_system
+        ansible_host: "{{ server_info.server.public_v4 }}"
+        ansible_user: ubuntu
+        ansible_ssh_common_args: >
+          -o IdentitiesOnly=yes
+          -o BatchMode=yes
+          -o UserKnownHostsFile=/dev/null
+          -o StrictHostKeyChecking=no
+
+- hosts: prometheus_server
+  gather_facts: no
+  tasks:
+    - name: Wait for ssh to wake up
+      wait_for_connection:
+
+    - name: Download Prometheus 2.22.2
+      get_url:
+        url: "https://github.com/prometheus/prometheus/releases/download/v2.22.2/prometheus-2.22.2.linux-amd64.tar.gz"
+        dest: /tmp
+        checksum: "sha256:acd3189c3f09b3857b6635df327814633939be07d12c4eea8f78c94fe9fd115c"
+
+    - name: Add the user "prometheus"
+      become: yes
+      user:
+        name: "prometheus"
+        shell: "/bin/false"
+        create_home: no
+
+    - name: Create folder to extract Prometheus
+      become: yes
+      file:
+        path: "/etc/prometheus"
+        state: directory
+
+    - name: Extract Prometheus
+      become: yes
+      unarchive:
+        src: "/tmp/prometheus-2.22.2.linux-amd64.tar.gz" 
+        dest: "/etc/prometheus"
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+
+    - name: Change permissions of Prometheus folder and contents
+      become: yes
+      file:
+        path: "/etc/prometheus"
+        owner: "prometheus"
+        group: "prometheus"
+        mode: "0755"
+        recurse: yes
+    
+    - name: Delete compressed download
+      file:
+        path: "/tmp/prometheus-2.22.2.linux-amd64.tar.gz"
+        state: absent
+
+    - name: Copy Prometheus executable on bin folder
+      become: yes
+      copy:
+        src: "/etc/prometheus/{{item}}"
+        dest: "/bin"
+        remote_src: yes
+        owner: "prometheus"
+        group: "prometheus"
+        mode: "0755"
+      loop:
+        - prometheus
+        - promtool
+
+    - name: Remove Prometheus executables from /etc/prometheus folder
+      become: yes
+      file:
+        path: "/etc/prometheus/{{item}}"
+        state: absent
+      loop:
+        - prometheus
+        - promtool
+
+    - name: Create storage.tsdb folder
+      become: yes
+      file:
+        path: "/var/lib/prometheus"
+        state: directory
+        owner: "prometheus"
+        group: "prometheus"
+        mode: "0755"
+
+    - name: Create Prometheus service File
+      become: yes
+      file:
+        path: /etc/systemd/system/prometheus.service
+        state: touch
+
+    - name: Edit Prometheus agent service file
+      become: yes
+      blockinfile:
+        path: /etc/systemd/system/prometheus.service
+        marker: ""
+        block: |
+          [Unit]
+          Description=Prometheus
+          Wants=network-online.target
+          After=network-online.target
+  
+          [Service]
+          User=prometheus
+          Group=prometheus
+          Type=simple
+          ExecStart=/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries
+  
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: systemd reload
+      become: yes
+      systemd:
+        daemon_reload: yes
+
+    - name: Generating Prometheus Configuration
+      become: yes
+      template:
+        src: "prometheus.yml.tmpl"
+        dest: "/etc/prometheus/prometheus.yml"
+        owner: "prometheus"
+        group: "prometheus"
+        mode: "0755"        
+  
+    - name: Start Prometheus service
+      become: yes
+      service:
+        name: prometheus
+        enabled: yes
+        state: started
