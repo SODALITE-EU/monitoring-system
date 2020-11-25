@@ -1,0 +1,54 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+  - iac-modules/openstack/openstack_vm.yaml
+
+node_types:
+  sodalite.nodes.OpenStack.MonitoredVM:
+    derived_from: sodalite.nodes.OpenStack.VM
+    attributes:
+      id:
+        type: string
+        description: OpenStack id of the VM
+      private_address:
+        type: string
+        description: Private ipv4
+      public_address:
+        type: string
+        description: Public ipv4
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          create:
+            inputs:
+              vm_name:  { type: string, default: { get_property: [ SELF, name     ] } }
+              image:    { type: string, default: { get_property: [ SELF, image    ] } }
+              flavor:   { type: string, default: { get_property: [ SELF, flavor   ] } }
+              network:  { type: string, default: { get_property: [ SELF, network  ] } }
+              security_groups:  { type: string, default: { get_property: [ SELF, security_groups  ] } }
+              key_name: { type: string, default: { get_property: [ SELF, key_name ] } }
+#             metadata: { type: string, default: "" }
+              consul_server_address: { type: string, default: { get_input: consul_server_public_address } }
+            implementation: playbooks/vm/create.yml
+#        delete:
+#          inputs:
+#            id: { default: { get_attribute: [ SELF, id ] } }
+#          implementation: playbooks/vm/delete.yml
+
+topology_template:
+
+  inputs:
+    consul_server_public_address:
+      type: string
+
+  node_templates:
+    vm:
+      type: sodalite.nodes.OpenStack.MonitoredVM
+      properties:
+        name: testing-node-exporter
+        image: ubuntu
+        flavor: m1.small
+        network: orchestrator-network
+        security_groups: default,node-exporter
+        key_name: jorge-test

@@ -7,3 +7,6 @@
 [submodule "prometheus-server/xopera/iac-modules"]
 	path = prometheus-server/xopera/iac-modules
 	url = https://github.com/SODALITE-EU/iac-modules.git
+[submodule "node-exporter/xopera/iac-modules"]
+	path = node-exporter/xopera/iac-modules
+	url = https://github.com/SODALITE-EU/iac-modules.git

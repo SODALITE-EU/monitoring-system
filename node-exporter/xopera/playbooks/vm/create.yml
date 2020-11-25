@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: localhost
   gather_facts: no
 
   tasks:
@@ -12,7 +12,6 @@
         flavor: "{{ flavor }}"
         network: "{{ network }}"
         security_groups: "{{ security_groups }}"
-        metadata: "{{ metadata }}"
       register: server_info
 
     - name: Set attributes
@@ -24,8 +23,8 @@
 
     - name: Create temporary inventory for ssh wait
       add_host:
-        name: server
-        groups: vms
+        name: monitored_vm
+        groups: monitored_vms
         ansible_host: "{{ server_info.server.public_v4 }}"
         ansible_user: ubuntu
         ansible_ssh_common_args: >
@@ -34,24 +33,18 @@
           -o UserKnownHostsFile=/dev/null
           -o StrictHostKeyChecking=no
 
-    - name: add metadata to instance
-    openstack.cloud.server_metadata:
-        state: present
-        auth:
-            auth_url: 
-            username: 
-            password: 
-            project_name: 
-        name: "{{ vm_name }}"
-        meta:
-            prometheus_io_scrape: true
-            prometheus_io_port: 9100
-    
+- hosts: monitored_vm
+  gather_facts: no
+  tasks:
+    - name: Wait for ssh to wake up
+      wait_for_connection:
+
     - name: Add the user "node_exporter"
-    user:
-      name: "node_exporter"
-      shell: "/bin/false"
-      create_home: no
+      become: yes
+      user:
+        name: "node_exporter"
+        shell: "/bin/false"
+        create_home: no
   
     - name: Download Node exporter
       get_url:
@@ -60,7 +53,6 @@
         checksum: "sha256:3369b76cd2b0ba678b6d618deab320e565c3d93ccb5c2a0d5db51a53857768ae"
   
     - name: Extract Node exporter
-      become: yes
       unarchive:
         src: "/tmp/node_exporter-1.0.1.linux-amd64.tar.gz"
         dest: "/tmp"
@@ -71,6 +63,7 @@
       copy: 
         src: "/tmp/node_exporter-1.0.1.linux-amd64/node_exporter"
         dest: "/usr/local/bin"
+        remote_src: yes
     
     - name: Give the user "node_exporter" permission to that binary
       become: yes
@@ -128,8 +121,22 @@
         enabled: yes
         state: started
 
-- hosts: vms
-  gather_facts: no
-  tasks:
-    - name: Wait for ssh to wake up
-      wait_for_connection:
+#   The playbook fails here because {{ id }} and {{ public_address }} are undefined
+#   despite them being tentatively saved as attributes on creation time
+#   Is there any way to know these values on playbook runtime?
+
+    - name: Create node-exporter.json file
+      become: yes
+      blockinfile:
+        path: /tmp/node-exporter.json
+        marker: ""
+        block: |
+          {
+            "Name": "consul-registered-node-exporters",
+            "ID": "{{ id }}-node-exporter",
+            "Address": "{{ public_address }}",
+            "Port": 9100
+          }
+
+    - name: Register node-exporter in Consul server
+      shell: curl --request PUT --data @/tmp/node_exporter.json http://{{ consul_server_address|quote }}:8500/v1/agent/service/register
