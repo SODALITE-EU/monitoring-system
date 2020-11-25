@@ -2,33 +2,37 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
-alerting:
-  alertmanagers:
-  - static_configs:
-    - targets:
+rule_files:
+  - /etc/alertmanager/rules.yml
 
-rule_files: []
+# Alerting specifies settings related to the Alertmanager
+alerting:
+ alertmanagers:
+   - static_configs:
+     - targets:
+       # Alertmanager's default port is 9093
+       - localhost:9093
 
 scrape_configs:
-  - job_name: prometheus
+  - job_name: 'prometheus'
     scrape_interval: 5s
     static_configs:
-      - {targets: ['localhost:9090']}
+      - targets: ['localhost:9090']
 
-  - job_name: openstack
+  - job_name: 'node-exporter'
     scheme: http
     openstack_sd_configs:
-      - {identity_endpoint: 'https://cloud.sodalite.eu:5000/v3/', username: mario, project_name: ochestrator, password: 'yourpassword', rol
-e: instance, domain_name: default, project_id: '0f3710f7dc4341f388f5df59cdb62b6a', port: 9100}
+      - {identity_endpoint: 'https://cloud.sodalite.eu:5000/v3/', username: mario, project_name: orchestrator, password: 'medaigual123!', role: instance, domain_name: default, region: RegionOne,  project_id: '8a1a7649c3a44f16a70361b485389340'}
     relabel_configs:
-        # Keep only instances which are flagged for scraping
+      # keep only instances which are flagged for scraping
       - {source_labels: [__meta_openstack_tag_prometheus_io_scrape], action: keep, regex: 'true'}
-      # Commented to use the private IPs
-      - {source_labels: [__meta_openstack_public_ip, __meta_openstack_tag_prometheus_io_port], action: replace, regex: '([^:]+)(?::\d+)?;
-(\d+)', replacement: '$1:$2', target_label: __address__}
-      #- {source_labels: [__address__, __meta_openstack_tag_prometheus_io_port], action: replace, regex: '([^:]+)(?::\d+)', replacement:
-'$1:$2', target_label: __address_}
-      - {source_labels: [__meta_openstack_instance_name], target_label: instance}
+      # Commented to use the private IP
+      - {source_labels: [__meta_openstack_public_ip, __meta_openstack_tag_prometheus_io_port], action: replace, regex: '([^:]+)(?::\d+)?;(\d+)', replacement: '$1:$2', target_label: __address__}
+      #- {source_labels: [__address__, __meta_openstack_tag_prometheus_io_port], action: replace, regex: '([^:]+)(?::\d+)', replacement: '$1:$2', target_label: __addre$
+      #- {source_labels: [__meta_openstack_instance_name], target_label: instance}
+      - {source_labels: [__meta_openstack_public_ip, __meta_openstack_tag_prometheus_io_port], action: replace, regex: '([^:]+)(?::\d+)?;(\d+)', replacement: '$1:$2', target_label: instance}
+      - {source_labels: [__meta_openstack_instance_name], target_label: os_id}
+
 
   - job_name: skydive
     scrape_interval: 5s
