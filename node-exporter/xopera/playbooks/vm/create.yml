@@ -32,6 +32,9 @@
           -o BatchMode=yes
           -o UserKnownHostsFile=/dev/null
           -o StrictHostKeyChecking=no
+        private_address: "{{ server_info.server.private_v4 }}"
+        public_address: "{{ server_info.server.public_v4 }}"
+        id: "{{ server_info.server.id }}"
 
 - hosts: monitored_vm
   gather_facts: no
@@ -121,22 +124,14 @@
         enabled: yes
         state: started
 
-#   The playbook fails here because {{ id }} and {{ public_address }} are undefined
-#   despite them being tentatively saved as attributes on creation time
-#   Is there any way to know these values on playbook runtime?
-
-    - name: Create node-exporter.json file
+    - name: Generating JSON object into a node_exporter.json file
       become: yes
-      blockinfile:
-        path: /tmp/node-exporter.json
-        marker: ""
-        block: |
-          {
-            "Name": "consul-registered-node-exporters",
-            "ID": "{{ id }}-node-exporter",
-            "Address": "{{ public_address }}",
-            "Port": 9100
-          }
+      template:
+        src: "node_exporter.json.tmpl"
+        dest: "/tmp/node_exporter.json"
+        owner: "node_exporter"
+        group: "node_exporter"
+        mode: "0755"
 
     - name: Register node-exporter in Consul server
       shell: curl --request PUT --data @/tmp/node_exporter.json http://{{ consul_server_address|quote }}:8500/v1/agent/service/register

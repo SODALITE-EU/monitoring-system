@@ -30,7 +30,10 @@ node_types:
               key_name: { type: string, default: { get_property: [ SELF, key_name ] } }
 #             metadata: { type: string, default: "" }
               consul_server_address: { type: string, default: { get_input: consul_server_public_address } }
-            implementation: playbooks/vm/create.yml
+            implementation:
+              primary: playbooks/vm/create.yml
+              dependencies: 
+                - playbooks/node_exporter.json.tmpl
 #        delete:
 #          inputs:
 #            id: { default: { get_attribute: [ SELF, id ] } }
