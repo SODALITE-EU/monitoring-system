@@ -7,6 +7,7 @@ RUN apt-get update -y && \
 
 COPY ./requirements.txt /app/requirements.txt
 
+# If rebuilt, must be downloaded first from Prometheus website
 COPY ./promtool /bin/promtool
 
 WORKDIR /app
