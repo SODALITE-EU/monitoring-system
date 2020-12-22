@@ -16,4 +16,4 @@ RUN pip3 install -r requirements.txt
 
 COPY ./app.py /app
 
-CMD [ "sh", "-c", "gunicorn -w ${GUNICORN_WORKERS} -b :9092 app:app" ]
+CMD [ "sh", "-c", "gunicorn -w ${GUNICORN_WORKERS} -b :${RULESERVER_PORT} app:app" ]
