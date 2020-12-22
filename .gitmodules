@@ -1,6 +1,3 @@
-[submodule "skydive-flow-exporter"]
-	path = skydive-flow-exporter
-	url = https://github.com/skydive-project/skydive-flow-exporter
 [submodule "consul-server/xopera/iac-modules"]
 	path = consul-server/xopera/iac-modules
 	url = https://github.com/SODALITE-EU/iac-modules.git
