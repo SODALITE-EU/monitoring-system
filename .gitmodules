@@ -1,9 +1,9 @@
 [submodule "consul-server/xopera/iac-modules"]
-	path = consul-testbed-poc/consul-server/xopera/iac-modules
+	path = consul-registration-poc/openstack/consul-server/xopera/iac-modules
 	url = https://github.com/SODALITE-EU/iac-modules.git
 [submodule "prometheus-server/xopera/iac-modules"]
-	path = consul-testbed-poc/prometheus-server/xopera/iac-modules
+	path = consul-registration-poc/openstack/prometheus-server/xopera/iac-modules
 	url = https://github.com/SODALITE-EU/iac-modules.git
 [submodule "node-exporter/xopera/iac-modules"]
-	path = consul-testbed-poc/node-exporter/xopera/iac-modules
+	path = consul-registration-poc/openstack/node-exporter/xopera/iac-modules
 	url = https://github.com/SODALITE-EU/iac-modules.git
