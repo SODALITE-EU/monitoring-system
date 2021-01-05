@@ -5,4 +5,4 @@ Current content of this repository:
 * Implementation and Dockerfile of the rule files management server
 * Resources for Jenkins-automated Docker image pulling to SODALITE production registry
 
-Blueprints, playbooks and templates for monitoring system dockerized components can be found [here](https://github.com/fabeirojorge-sw/iac-platform-stack/blob/f1d61d3c0c4563f7858e226fa096ac51d748860e/docker-local/service.yaml#L431)
+Blueprints, playbooks and templates for monitoring system dockerized components can be found [here](https://github.com/SODALITE-EU/iac-platform-stack/blob/e3a7579862910e2cdaa508e69829baf1b0a39271/docker-local/service.yaml#L580)
