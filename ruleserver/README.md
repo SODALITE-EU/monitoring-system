@@ -3,7 +3,7 @@
 Server for adding/removing both recording and alerting rule files from the Prometheus server.  
 
 ## Deployment
-This component is expected to be deployed [(see the blueprint)](https://github.com/fabeirojorge-sw/iac-platform-stack/blob/f1d61d3c0c4563f7858e226fa096ac51d748860e/docker-local/service.yaml#L489) along with Consul, Prometheus and Alertmanager components.
+This component is expected to be deployed [(see the blueprint)](https://github.com/SODALITE-EU/iac-platform-stack/blob/e3a7579862910e2cdaa508e69829baf1b0a39271/docker-local/service.yaml#L652) along with Consul, Prometheus and Alertmanager components.
 
 If you want to deploy this component as a standalone Docker container for research or debug purposes, you must provide the `docker run <image>` command with the following additional parameters:
 * Volumes (`-v "rules-volume:/etc/prometheus/rules"`): When deployed inside the stack, the rule server shares the `/etc/prometheus/rules/` folder of the Prometheus instance through a Docker volume. The Flask app implementing the API expects such a folder to be available in the rule server filesystem:  
