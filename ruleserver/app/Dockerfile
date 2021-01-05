@@ -1,3 +1,13 @@
+FROM alpine:3.12 as builder
+
+ENV PROMETHEUS_VERSION=2.23.0
+
+# Download promtool from Prometheus site
+RUN apk --update add wget tar \
+    && wget -c https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz \
+    && tar -xzf prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz \
+    && mv prometheus-${PROMETHEUS_VERSION}.linux-amd64 prometheus
+
 FROM python:3.8-slim-buster
 
 # LABEL maintainer="fabeirojorge.secondwindow@gmail.com"
@@ -7,8 +17,7 @@ RUN apt-get update -y && \
 
 COPY ./requirements.txt /app/requirements.txt
 
-# If rebuilt, must be downloaded first from Prometheus website
-COPY ./promtool /bin/promtool
+COPY --from=builder prometheus/promtool /bin/promtool
 
 WORKDIR /app
 
