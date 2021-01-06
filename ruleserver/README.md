@@ -13,6 +13,24 @@ If you want to deploy this component as a standalone Docker container for resear
 
 ## Usage
 
+### Rule file example
+
+This is an example of a file defining a rule that triggers an alert when the CPU load of a host is over the 80% during more than 5 minutes.
+```
+groups:
+- name: alert.rules
+  rules:
+  - alert: HostHighCpuLoad
+    expr: 100 - (avg by(instance,os_id) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host high CPU load (instance {{ $labels.instance }})"
+      description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+```
+You can get more information about [alerting rules for Prometheus](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/) in its documentation website.
+
 ### API for add/remove rule files
 
 This server offers a simple API composed of two kinds of requests:
