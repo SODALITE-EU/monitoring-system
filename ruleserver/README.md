@@ -43,4 +43,4 @@ After this request, the server copies the contents of `rule-file-to-add.yml` int
 #### Remove request
 `curl http://<ruleserver_ip>:<port>/rules/remove/<file-id>`
 
-After this request, the server looks for a file named `rules-<file-id>.yml` in the Docker volume shared with the Prometheus component and removes it if found. The server forces the configuration of the Prometheus instance to reload by sending a SIGHUP signal to it.
+After this request, the server looks for a file named `rules-<file-id>.yml` in the Docker volume shared with the Prometheus component and removes it if found. The server forces the configuration of the Prometheus instance to reload by sending a SIGHUP signal to it .
