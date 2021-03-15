@@ -45,7 +45,7 @@ def reload_prometheus_configuration():
 @app.route('/rules/add/<model_id>', methods=['POST'])
 def add_rule_file(model_id=None):
 	if not validate_modelid(model_id):
-		return "Model id is not valid", 400
+		return "Model id is not valid\n", 400
 
 	input_path = "/tmp/rules_%s.yml" % model_id
 	f = open(input_path, "bw")
@@ -53,26 +53,26 @@ def add_rule_file(model_id=None):
 	f.close()
 
 	if not validate_file(input_path):
-		return "Rule file did not pass the promtool check", 400
+		return "Rule file did not pass the promtool check\n", 400
 	else:
 		if register_rule_file(input_path,model_id):
 			if reload_prometheus_configuration():
-				return ("Updated Prometheus config with a rule file for model id %s" % model_id), 200
+				return ("Updated Prometheus config with a rule file for model id %s\n" % model_id), 200
 			else:
-				return "Rule file was added but config reload failed", 400
+				return "Rule file was added but config reload failed\n", 400
 		else:
-			return "Rule file could not be copied to Prometheus rules folder", 400
+			return "Rule file could not be copied to Prometheus rules folder\n", 400
 
 @app.route('/rules/remove/<model_id>', methods=['GET'])
 def remove_rule_file(model_id=None):
 
 	if not validate_modelid(model_id):
-		return "Model id is not valid", 400
+		return "Model id is not valid\n", 400
 
 	if unregister_rule_file(model_id):
 		if reload_prometheus_configuration():
-			return ("Updated Prometheus config with rules for model id %s removed" % model_id), 200
+			return ("Updated Prometheus config with rules for model id %s removed\n" % model_id), 200
 		else:
-			return "Rule file was removed but config reload failed", 400
+			return "Rule file was removed but config reload failed\n", 400
 	else:
-		return ("Rule file for model %s has been not found" % model_id), 400
+		return ("Rule file for model %s has been not found\n" % model_id), 400
