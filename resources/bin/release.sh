@@ -8,7 +8,8 @@ usage() {
 }
 
 guess_current_version() {
-    V=$(git tag -l | tail -1 | sed -e"s/v//")
+    V=$(git tag -l | sed -e"s/v//" | grep -o ^[0-9][0-9]*.[0-9][0-9]*.[0-9][0-9]* | sort | tail -1 )
+
     if [ -z "$V" ]; then
         V=0.0.1
     fi
@@ -66,9 +67,9 @@ echo "Release version:$RELEASE_Mmp"
 
 read -p "Press enter to continue"
 
-git tag -a v${RELEASE_Mmp} -m "Release ${RELEASE_Mmp}"
+git tag -a ${RELEASE_Mmp} -m "Release ${RELEASE_Mmp}"
 
 echo
 echo
 echo "Now type to persist changes:"
-echo git push origin v${RELEASE_Mmp}
+echo git push origin ${RELEASE_Mmp}
