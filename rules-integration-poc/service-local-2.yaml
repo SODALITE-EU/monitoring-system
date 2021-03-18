@@ -1,0 +1,23 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+  - ruleset.config.yml
+
+topology_template:
+
+  inputs:
+    rule_server_address:
+      type: string
+    ruleset_id:
+      type: string
+    ruleset:
+      type: string
+    
+  node_templates:
+
+    rule-config:
+      type: sodalite.nodes.Configuration.ruleset
+      properties:
+        src: { get_input: ruleset }
+        dest: { get_input: rule_server_address }
+        id: { get_input: ruleset_id }

@@ -1,0 +1,3 @@
+rule_server_address: 192.168.3.27
+ruleset_id: poc-test
+ruleset: /home/ubuntu/repositories/monitoring-system/rules-integration-poc/playbooks/ruleset.yml
