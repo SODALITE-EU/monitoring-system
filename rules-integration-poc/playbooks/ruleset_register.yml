@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Register ruleset in ruleserver
+      shell: curl --data-binary @{{ src }} http://{{ dest|quote }}:9092/rules/add/{{ id }}
+...

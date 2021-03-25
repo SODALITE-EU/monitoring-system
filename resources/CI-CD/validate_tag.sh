@@ -22,6 +22,7 @@ VALUE=$2
 
 # Functions
 
+#Matches anything that matches SemVarStage or SemVarProd.
 SemVar() {
   if [[ "$VALUE" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
     echo true | tr -d '\n'
@@ -30,6 +31,9 @@ SemVar() {
   fi
 }
 
+# Matches N.N.N-R, N.N.N-R.R, N.N.N-R+C, N.N.N-R.R+C, N.N.N-R+C.C and N.N.N-R.R+C.C 
+# where N is any number, C is any mix of alphanumeric characters and dashes (-), 
+# and R is the same as C except it can't be a pure number that starts with 0.
 SemVarStage() {
   if [[ "$VALUE" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
     echo true | tr -d '\n'
@@ -38,6 +42,8 @@ SemVarStage() {
   fi
 }
 
+
+# Matches N.N.N or N.N.N+C or N.N.N+C.C where N is any number and C is any mix of alphanumeric characters and dashes (-)
 SemVarProd() {
   if [[ "$VALUE" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
     echo true | tr -d '\n'

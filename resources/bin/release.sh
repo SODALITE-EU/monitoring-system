@@ -9,7 +9,6 @@ usage() {
 
 guess_current_version() {
     V=$(git tag -l | sed -e"s/v//" | grep -o ^[0-9][0-9]*.[0-9][0-9]*.[0-9][0-9]* | sort | tail -1 )
-
     if [ -z "$V" ]; then
         V=0.0.1
     fi
@@ -63,7 +62,7 @@ fi
 
 echo "Current branch: $CURRENT_BRANCH"
 echo "Current version: $CURRENT_Mmp"
-echo "Release version:$RELEASE_Mmp"
+echo "Release version: $RELEASE_Mmp"
 
 read -p "Press enter to continue"
 
