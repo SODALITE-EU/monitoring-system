@@ -1,19 +1,27 @@
 groups:
 - name: alert.rules
   rules:
-  - alert: HostHighCpuLoad
-    expr: 100 - (avg by(instance,os_id) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+  - alert: OutOfDiskSpace
+    expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 25 and ON (instance, device, mountpoint) node_filesystem_readonly == 0
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: Disk space running low
+      description: "Available disk space is low (< 25% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: CoresHighCPU
+    expr: (count ((1-rate(node_cpu_seconds_total{mode="idle"}[1m]))>0.75))/(count (node_cpu_seconds_total{mode="idle"})) > 0.5
     for: 5m
     labels:
       severity: warning
     annotations:
-      summary: "Host high CPU load (instance {{ $labels.instance }})"
-      description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-  - alert: HostLowCpuLoad
-    expr: 100 - (avg by(instance,os_id) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) < 20
+      summary: "More than 50% of cores are above 75% load"
+      description: "Percentage of cores above 75% load is > 50%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: LowReceivedNetworkTraffic
+    expr: sum(increase(node_network_receive_bytes_total[1h])) < 30000000
     for: 5m
     labels:
       severity: warning
     annotations:
-      summary: "Host low CPU load (instance {{ $labels.instance }})"
-      description: "CPU load is < 20%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      summary: "Low incoming network traffic"
+      description: "Received network traffic in the last hour is < 30MB\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
