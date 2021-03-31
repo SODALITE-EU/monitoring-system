@@ -1,0 +1,19 @@
+rule_server_address: 192.168.3.27
+ruleset_id: snow-uc
+ruleset: 
+- name: OutOfDiskSpace
+  expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 25 and ON (instance, device, mountpoint) node_filesystem_readonly == 0
+  for: 2m
+  summary: Disk space running low
+  desc: "Available disk space is low (< 25% left)"
+- name: CoresHighCPU
+  expr: ((count by (instance) ((1-rate(node_cpu_seconds_total{mode="idle"}[1m]))>0.75))/(count by (instance) (node_cpu_seconds_total{mode="idle"})) OR on() vector(0) )> 0.5
+  for: 5m
+  summary: More than 50% of cores are above 75% load
+  desc: "Percentage of cores above 75% load is > 50%"
+- name: LowReceivedNetworkTraffic
+  expr: sum by (instance) (increase(node_network_receive_bytes_total[1h])) < 30000000
+  for: 5m
+  summary: Low incoming network traffic
+  desc: "Received network traffic in the last hour is < 30MB"
+
