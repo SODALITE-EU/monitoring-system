@@ -3,7 +3,13 @@
   gather_facts: no
 
   tasks:
+    - name: Create ruleset file from template 
+      become: yes
+      template:
+        src: "ruleset.yml.j2"
+        dest: "/tmp/ruleset.yml"
+        mode: "0755"
 
     - name: Register ruleset in ruleserver
-      shell: curl --data-binary @{{ src }} http://{{ dest|quote }}:9092/rules/add/{{ id }}
+      shell: curl --data-binary @/tmp/ruleset.yml http://{{ dest|quote }}:9092/rules/add/{{ id }}
 ...

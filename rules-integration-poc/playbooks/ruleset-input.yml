@@ -1,6 +1,4 @@
-rule_server_address: 192.168.3.27
-ruleset_id: poc-test
-ruleset: 
+ruleset:
 - name: OutOfDiskSpace
   expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 25 and ON (instance, device, mountpoint) node_filesystem_readonly == 0
   for: 2m
@@ -16,4 +14,3 @@ ruleset:
   for: 5m
   summary: "Low incoming network traffic (instance {{ $labels.instance }})"
   desc: "Received network traffic in the last hour is < 30MB\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-

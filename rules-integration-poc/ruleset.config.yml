@@ -5,9 +5,9 @@ node_types:
     derived_from: tosca.nodes.SoftwareComponent
     description: Node for registration/deregistration of the ruleset file
     properties:
-      src:
-        type: string
-        description: ruleset file to register
+      ruleset:
+        type: list
+        description: ruleset list with rules to register
         required: True
       dest:
         type: string
@@ -23,11 +23,14 @@ node_types:
         operations:
           create:
             inputs:
-              src:     { default: { get_property: [ SELF, src ] }, type: string }
+              ruleset: { default: { get_property: [ SELF, ruleset ] }, type: string }
               dest:    { default: { get_property: [ SELF, dest ] }, type: string }
               id:      { default: { get_property: [ SELF, id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_register.yml
+              dependencies:
+                - playbooks/ruleset.yml.j2
+
           delete:
             inputs:
               dest:    { default: { get_property: [ SELF, dest ] }, type: string }

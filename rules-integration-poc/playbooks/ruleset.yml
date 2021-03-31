@@ -1,3 +1,4 @@
+#This is how the ruleset file should end up looking like.
 groups:
 - name: alert.rules
   rules:
@@ -7,21 +8,21 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: Disk space running low
+      summary: Disk space running low (instance {{ $labels.instance }})
       description: "Available disk space is low (< 25% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
   - alert: CoresHighCPU
-    expr: (count ((1-rate(node_cpu_seconds_total{mode="idle"}[1m]))>0.75))/(count (node_cpu_seconds_total{mode="idle"})) > 0.5
+    expr: ((count by (instance) ((1-rate(node_cpu_seconds_total{mode="idle"}[1m]))>0.75))/(count by (instance) (node_cpu_seconds_total{mode="idle"})) OR on() vector(0) )> 0.5
     for: 5m
     labels:
       severity: warning
     annotations:
-      summary: "More than 50% of cores are above 75% load"
+      summary: "More than 50% of cores are above 75% load (instance {{ $labels.instance }})"
       description: "Percentage of cores above 75% load is > 50%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
   - alert: LowReceivedNetworkTraffic
-    expr: sum(increase(node_network_receive_bytes_total[1h])) < 30000000
+    expr: sum by (instance) (increase(node_network_receive_bytes_total[1h])) < 30000000
     for: 5m
     labels:
       severity: warning
     annotations:
-      summary: "Low incoming network traffic"
+      summary: "Low incoming network traffic (instance {{ $labels.instance }})"
       description: "Received network traffic in the last hour is < 30MB\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
