@@ -20,4 +20,4 @@ topology_template:
       properties:
         ruleset: { get_input: ruleset }
         dest: { get_input: rule_server_address }
-        id: { get_input: ruleset_id }
+        ruleset_id: { get_input: ruleset_id }

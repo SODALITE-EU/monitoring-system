@@ -13,7 +13,7 @@ node_types:
         type: string
         description: IP address of the ruleserver
         required: True
-      id: 
+      ruleset_id: 
         type: string
         description: name of the ruleset to register
         required: True
@@ -25,16 +25,16 @@ node_types:
             inputs:
               ruleset: { default: { get_property: [ SELF, ruleset ] }, type: string }
               dest:    { default: { get_property: [ SELF, dest ] }, type: string }
-              id:      { default: { get_property: [ SELF, id ] }, type: string }
+              ruleset_id:      { default: { get_property: [ SELF, id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_register.yml
               dependencies:
-                - playbooks/ruleset.yml.j2
+                - artifacts/ruleset.yml.j2
 
           delete:
             inputs:
               dest:    { default: { get_property: [ SELF, dest ] }, type: string }
-              id:      { default: { get_property: [ SELF, id ] }, type: string }
+              ruleset_id:      { default: { get_property: [ SELF, id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_deregister.yml
               
