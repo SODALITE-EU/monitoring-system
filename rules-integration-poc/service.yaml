@@ -6,7 +6,7 @@ imports:
 topology_template:
 
   inputs:
-    rule_server_address:
+    ruleserver_address:
       type: string
     ruleset_id:
       type: string
@@ -19,5 +19,5 @@ topology_template:
       type: sodalite.nodes.Configuration.ruleset
       properties:
         ruleset: { get_input: ruleset }
-        dest: { get_input: rule_server_address }
+        ruleserver_address: { get_input: ruleserver_address }
         ruleset_id: { get_input: ruleset_id }
