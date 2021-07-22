@@ -5,5 +5,5 @@
   tasks:
     
     - name: Deregister rule file in ruleserver
-      shell: curl http://{{ ruleserver_address|quote }}:9092/rules/remove/{{ ruleset_id }}
+      shell: curl -X DELETE http://{{ ruleserver_address|quote }}:9092/rules/{{ ruleset_id }}
 ...

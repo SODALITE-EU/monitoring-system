@@ -35,7 +35,7 @@ node_types:
         type: string
         description: IP address of the ruleserver
         required: True
-      ruleset_id: 
+      monitoring_id: 
         type: string
         description: name of the ruleset to register
         required: True
@@ -47,7 +47,7 @@ node_types:
             inputs:
               ruleset:            { default: { get_property: [ SELF, ruleset ] }, type: string }
               ruleserver_address: { default: { get_property: [ SELF, ruleserver_address ] }, type: string }
-              ruleset_id:         { default: { get_property: [ SELF, ruleset_id ] }, type: string }
+              monitoring_id:      { default: { get_property: [ SELF, monitoring_id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_register.yml
               dependencies:
@@ -56,7 +56,7 @@ node_types:
           delete:
             inputs:
               ruleserver_address: { default: { get_property: [ SELF, ruleserver_address ] }, type: string }
-              ruleset_id:         { default: { get_property: [ SELF, ruleset_id ] }, type: string }
+              monitoring_id:      { default: { get_property: [ SELF, monitoring_id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_deregister.yml
               
