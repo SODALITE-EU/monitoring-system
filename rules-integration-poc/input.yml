@@ -1,4 +1,4 @@
-rule_server_address: 192.168.3.27
+ruleserver_address: 192.168.3.27
 ruleset_id: snow-uc
 ruleset: 
 - name: OutOfDiskSpace
