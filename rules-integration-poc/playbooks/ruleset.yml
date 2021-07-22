@@ -3,26 +3,32 @@ groups:
 - name: alert.rules
   rules:
   - alert: OutOfDiskSpace
-    expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 25 and ON (instance, device, mountpoint) node_filesystem_readonly == 0
+    expr: (node_filesystem_avail_bytes{deployment_id="5sdfsdf121-sdf51s2df1-s45d51f121sdf"} * 100) / node_filesystem_size_bytes{deployment_id="5sdfsdf121-sdf51s2df1-s45d51f121sdf"} < 25 and ON (instance, device, mountpoint) node_filesystem_readonly{deployment_id="5sdfsdf121-sdf51s2df1-s45d51f121sdf"} == 0
     for: 2m
     labels:
       severity: warning
     annotations:
+      monitoring_id: '5sdfsdf121-sdf51s2df1-s45d51f121sdf'
+      instance: '{{ $labels.instance }}'
       summary: Disk space running low (instance {{ $labels.instance }})
       description: 'Available disk space is low (< 25% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
   - alert: CoresHighCPU
-    expr: ((count by (instance) ((1-rate(node_cpu_seconds_total{mode="idle"}[1m]))>0.75))/(count by (instance) (node_cpu_seconds_total{mode="idle"})) OR on() vector(0) )> 0.5
+    expr: ((count by (instance) ((1-rate(node_cpu_seconds_total{mode="idle",deployment_id="5sdfsdf121-sdf51s2df1-s45d51f121sdf"}[1m]))>0.75))/(count by (instance) (node_cpu_seconds_total{mode="idle",deployment_id="5sdfsdf121-sdf51s2df1-s45d51f121sdf"})) OR on() vector(0) )> 0.5
     for: 5m
     labels:
       severity: warning
     annotations:
+      monitoring_id: '5sdfsdf121-sdf51s2df1-s45d51f121sdf'
+      instance: '{{ $labels.instance }}'
       summary: 'More than 50% of cores are above 75% load (instance {{ $labels.instance }})'
       description: 'Percentage of cores above 75% load is > 50%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
   - alert: LowReceivedNetworkTraffic
-    expr: sum by (instance) (increase(node_network_receive_bytes_total[1h])) < 30000000
+    expr: sum by (instance) (increase(node_network_receive_bytes_total{deployment_id="5sdfsdf121-sdf51s2df1-s45d51f121sdf"}[1h])) < 30000000
     for: 5m
     labels:
       severity: warning
     annotations:
+      monitoring_id: '5sdfsdf121-sdf51s2df1-s45d51f121sdf'
+      instance: '{{ $labels.instance }}'
       summary: 'Low incoming network traffic (instance {{ $labels.instance }})'
       description: 'Received network traffic in the last hour is < 30MB\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'

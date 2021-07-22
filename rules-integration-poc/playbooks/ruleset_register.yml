@@ -11,5 +11,5 @@
         mode: "0755"
 
     - name: Register ruleset in ruleserver
-      shell: curl --data-binary @/tmp/ruleset.yml http://{{ dest|quote }}:9092/rules/add/{{ ruleset_id }}
+      shell: curl --data-binary @/tmp/ruleset.yml http://{{ ruleserver_address|quote }}:9092/rules/add/{{ ruleset_id }}
 ...

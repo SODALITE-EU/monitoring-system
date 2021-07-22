@@ -1,0 +1,6 @@
+{
+	"Name": "consul-registered-node-exporters",
+	"ID": "alde-node-exporter",
+	"Address": "192.168.2.20",
+	"Port": 19100
+}

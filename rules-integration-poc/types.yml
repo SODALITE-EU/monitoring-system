@@ -9,7 +9,7 @@ node_types:
         type: list
         description: ruleset list with rules to register
         required: True
-      dest:
+      ruleserver_address:
         type: string
         description: IP address of the ruleserver
         required: True
@@ -23,9 +23,9 @@ node_types:
         operations:
           create:
             inputs:
-              ruleset: { default: { get_property: [ SELF, ruleset ] }, type: string }
-              dest:    { default: { get_property: [ SELF, dest ] }, type: string }
-              ruleset_id:      { default: { get_property: [ SELF, id ] }, type: string }
+              ruleset:            { default: { get_property: [ SELF, ruleset ] }, type: string }
+              ruleserver_address: { default: { get_property: [ SELF, ruleserver_address ] }, type: string }
+              ruleset_id:         { default: { get_property: [ SELF, ruleset_id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_register.yml
               dependencies:
@@ -33,8 +33,8 @@ node_types:
 
           delete:
             inputs:
-              dest:    { default: { get_property: [ SELF, dest ] }, type: string }
-              ruleset_id:      { default: { get_property: [ SELF, id ] }, type: string }
+              ruleserver_address: { default: { get_property: [ SELF, ruleserver_address ] }, type: string }
+              ruleset_id:         { default: { get_property: [ SELF, ruleset_id ] }, type: string }
             implementation:
               primary: playbooks/ruleset_deregister.yml
               
