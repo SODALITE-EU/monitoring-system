@@ -24,7 +24,7 @@ def _validate_file(input_path):
         return False
 
 
-def _find_monitoring_id(monitoring_id, presence):
+def _find_monitoring_id(monitoring_id):
     return os.path.isfile("/etc/prometheus/rules/%s.yml" % monitoring_id)
 
 
