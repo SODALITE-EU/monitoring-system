@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import requests
+import re
 
 app = Flask(__name__)
 
@@ -23,13 +24,13 @@ def _validate_file(input_path):
         return False
 
 
-def _validate_monitoring_id(monitoring_id, presence):
-    if monitoring_id is None:
-        return False
-    if not presence:
-        return True
-    else:
-        return os.path.isfile("/etc/prometheus/rules/%s.yml" % monitoring_id)
+def _find_monitoring_id(monitoring_id, presence):
+    return os.path.isfile("/etc/prometheus/rules/%s.yml" % monitoring_id)
+
+
+def _validate_monitoring_id(monitoring_id):
+    pattern = re.compile("^[0-9a-zA-Z_-]+$")
+    pattern.match(monitoring_id)
 
 
 def _register_rule_file(filepath):
@@ -57,8 +58,8 @@ def _reload_prometheus_configuration():
 
 @app.route('/rules/<monitoring_id>', methods=['POST'])
 def add_rule_file(monitoring_id=None):
-    if not _validate_monitoring_id(monitoring_id, False):
-        return "Model id is not valid\n", 400
+    if not _validate_monitoring_id(monitoring_id):
+        return "Monitoring id is not valid\n", 401
 
     input_path = "/tmp/%s.yml" % monitoring_id
     f = open(input_path, "bw")
@@ -79,8 +80,10 @@ def add_rule_file(monitoring_id=None):
 
 @app.route('/rules/<monitoring_id>', methods=['DELETE'])
 def remove_rule_file(monitoring_id=None):
+    if not _validate_monitoring_id(monitoring_id):
+        return ("Not a valid monitoring_id"), 401
 
-    if not _validate_monitoring_id(monitoring_id, True):
+    if not _find_monitoring_id(monitoring_id):
         return ("Could not find ruleset for monitoring_id %s\n" % monitoring_id),  404
 
     if _unregister_rule_file(monitoring_id):
