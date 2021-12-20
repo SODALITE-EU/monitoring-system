@@ -15,9 +15,8 @@ reload_endpoint = prometheus_address + '/-/reload'
 
 def _validate_file(input_path):
     # Run promtool in order to check file syntax
-    completed = subprocess.run(["promtool", "check", "rules", input_path], text=True, capture_output=True)
-    output = completed.stdout
-    if (output.find("SUCCESS") != -1):
+    exit_code, output = subprocess.getstatusoutput("promtool check rules " + input_path)
+    if exit_code == 0 and (output.find("SUCCESS") != -1):
         return True
     else:
         os.remove(input_path)
