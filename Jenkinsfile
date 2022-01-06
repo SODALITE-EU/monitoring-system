@@ -55,20 +55,19 @@ pipeline {
                 sh "cd ruleserver/app/ && ../../resources/CI-CD/make_docker.sh build monitoring-system-ruleserver"
             }
         }
-        stage('Push monitoring-system-ruleserver to sodalite-private-registry') {
-            // Push during staging and production
+        stage('Push monitoring-system-ruleserver to DockerHub for staging') {
             when {
                 allOf {
                     expression{tag "*"}
                     expression{
-                        TAG_STAGING == 'true' || TAG_PRODUCTION == 'true'
+                        TAG_STAGING == 'true'
                     }
                 }
             }
             steps {
                 withDockerRegistry(credentialsId: 'jenkins-sodalite.docker_token', url: '') {
                     sh  """#!/bin/bash
-                        ./resources/CI-CD/make_docker.sh push monitoring-system-ruleserver staging
+                        ./resources/CI-CD/make_docker.sh push monitoring-system-ruleserver sodaliteh2020 staging
                         """
                 }
             }
@@ -85,7 +84,7 @@ pipeline {
              }
             steps {
                 withDockerRegistry(credentialsId: 'jenkins-sodalite.docker_token', url: '') {
-                    sh "./resources/CI-CD/make_docker.sh push monitoring-system-ruleserver production"
+                    sh "./resources/CI-CD/make_docker.sh push monitoring-system-ruleserver sodaliteh2020 production"
                 }
             }
         }
