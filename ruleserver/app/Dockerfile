@@ -8,7 +8,7 @@ RUN apk --update add wget tar \
     && tar -xzf prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz \
     && mv prometheus-${PROMETHEUS_VERSION}.linux-amd64 prometheus
 
-FROM python:3.10.0rc1-slim
+FROM python:3.13.0a3-slim
 
 # LABEL maintainer="fabeirojorge.secondwindow@gmail.com"
 
